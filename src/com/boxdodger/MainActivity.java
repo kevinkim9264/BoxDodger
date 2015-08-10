@@ -21,10 +21,12 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.TextureOptions;
@@ -52,13 +54,15 @@ import com.boxdodger.R;
 
 
 
+
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
-public class MainActivity extends SimpleBaseGameActivity {
+public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouchListener {
 	
 
 	private final static int CAMERA_WIDTH = 800;
@@ -387,7 +391,7 @@ public class MainActivity extends SimpleBaseGameActivity {
 		mScene.attachChild(timeText);
 		//=======================================
 		
-		
+	mScene.setOnSceneTouchListener(this);
 		
 		
 		mScene.registerUpdateHandler(new IUpdateHandler() {
@@ -468,7 +472,11 @@ public class MainActivity extends SimpleBaseGameActivity {
 					}
 				}
 				
+				
+				
 			}
+			
+			
 			
 			@Override
 			public void reset() {
@@ -535,6 +543,20 @@ public class MainActivity extends SimpleBaseGameActivity {
 					mScene.attachChild(gameOverText);
 		}
 		
+	}
+
+	
+	//Necessary for the user to go back to main menu, just by touching the screen.
+	@Override
+	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
+		if (pSceneTouchEvent.isActionDown()) {
+			if (stickMan.isDead){
+				saveThread.start();
+				finish();
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
