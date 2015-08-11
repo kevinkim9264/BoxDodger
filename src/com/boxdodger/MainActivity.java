@@ -98,6 +98,10 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	private BitmapTextureAtlas triangleBitmapTextureAtlas;
 	private TiledTextureRegion triangleBitmapTextureRegion;
 	
+	private BitmapTextureAtlas bigStarBitmapTextureAtlas;
+	private TiledTextureRegion bigStarBitmapTextureRegion;
+	private boolean starAppeared = false;
+	
 	static StickMan stickMan;
 	HashMap<Long, FallingObject> ballList = new HashMap<Long, FallingObject>();
 	ArrayList<Long> tempRemove = new ArrayList<Long>();
@@ -293,6 +297,12 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 				this.triangleBitmapTextureAtlas, this, "triangle_trans.png", 0, 0, 1, 1);
 		this.triangleBitmapTextureAtlas.load();
 		
+		//========= For bigStars.
+		this.bigStarBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 256, 256,
+				TextureOptions.BILINEAR);
+		this.bigStarBitmapTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+				this.bigStarBitmapTextureAtlas, this, "bigStar_trans.png", 0, 0, 1, 1);
+		this.bigStarBitmapTextureAtlas.load();
 		
 		//creating resources for controllers
 		this.mOnScreenControlTexture = new BitmapTextureAtlas(
@@ -415,6 +425,13 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					createRandomBall();
 				}
 				
+				if (playTime !=0 && playTime % 25 == 0 && starAppeared == false) {
+					starAppeared = true;
+					createRandomStar();
+				}
+				if (playTime % 25 != 0) {
+					starAppeared = false;
+				}
 				
 				
 				
@@ -525,6 +542,14 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		}
 		ballList.put(System.currentTimeMillis(), object);
 		mScene.attachChild(object);
+		this.ballCount++;
+	}
+	
+	public void createRandomStar() {
+		FallingObject star = new FallingBigStar(randomBallPos(), -100, bigStarBitmapTextureRegion,
+								this.getVertexBufferObjectManager());
+		ballList.put(System.currentTimeMillis(), star);
+		mScene.attachChild(star);
 		this.ballCount++;
 	}
 	
