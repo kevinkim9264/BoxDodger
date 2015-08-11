@@ -10,6 +10,7 @@ public class FallingSquare extends FallingObject {
 			VertexBufferObjectManager pVertexBufferObjectManager) {
 		super(pX, pY, pTextureRegion, pVertexBufferObjectManager, 40, 300);
 		this.registerEntityModifier(new RotationModifier(3, 0, 360));
+		this.color = "blue";
 	}
 
 }

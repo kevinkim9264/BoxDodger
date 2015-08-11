@@ -102,6 +102,21 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	private TiledTextureRegion bigStarBitmapTextureRegion;
 	private boolean starAppeared = false;
 	
+	// Region for splash animations of falling objects.
+	private BitmapTextureAtlas redSplashBitmapTextureAtlas;
+	private TiledTextureRegion redSplashBitmapTextureRegion;
+	
+	private BitmapTextureAtlas blueSplashBitmapTextureAtlas;
+	private TiledTextureRegion blueSplashBitmapTextureRegion;
+	
+	private BitmapTextureAtlas pinkSplashBitmapTextureAtlas;
+	private TiledTextureRegion pinkSplashBitmapTextureRegion;
+	
+	private BitmapTextureAtlas blackSplashBitmapTextureAtlas;
+	private TiledTextureRegion blackSplashBitmapTextureRegion;
+	
+	
+	
 	static StickMan stickMan;
 	HashMap<Long, FallingObject> ballList = new HashMap<Long, FallingObject>();
 	ArrayList<Long> tempRemove = new ArrayList<Long>();
@@ -304,6 +319,33 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 				this.bigStarBitmapTextureAtlas, this, "bigStar_trans.png", 0, 0, 1, 1);
 		this.bigStarBitmapTextureAtlas.load();
 		
+		//creating resources for object splashing
+		this.redSplashBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 64, 64,
+				TextureOptions.BILINEAR);
+		this.redSplashBitmapTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+				this.redSplashBitmapTextureAtlas, this, "red_splash_animation.png", 0, 0, 2, 2);
+		this.redSplashBitmapTextureAtlas.load();
+		
+		this.blueSplashBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 128, 128,
+				TextureOptions.BILINEAR);
+		this.blueSplashBitmapTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+				this.blueSplashBitmapTextureAtlas, this, "blue_splash_animation.png", 0, 0, 2, 2);
+		this.blueSplashBitmapTextureAtlas.load();
+		
+		this.pinkSplashBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 128, 128,
+				TextureOptions.BILINEAR);
+		this.pinkSplashBitmapTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+				this.pinkSplashBitmapTextureAtlas, this, "pink_splash_animation.png", 0, 0, 2, 2);
+		this.pinkSplashBitmapTextureAtlas.load();
+		
+		this.blackSplashBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 512, 512,
+				TextureOptions.BILINEAR);
+		this.blackSplashBitmapTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+				this.blackSplashBitmapTextureAtlas, this, "black_splash_animation.png", 0, 0, 2, 2);
+		this.blackSplashBitmapTextureAtlas.load();
+		
+		
+		
 		//creating resources for controllers
 		this.mOnScreenControlTexture = new BitmapTextureAtlas(
 				this.getTextureManager(), 512, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
@@ -311,7 +353,6 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 				this.mOnScreenControlTexture, this, "analog_control_base.png", 0, 0);
 		this.mOnScreenControlKnobTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 				this.mOnScreenControlTexture, this, "analog_control_knob.png", 128, 0);
-		
 		//this.mOnScreenControlTexture.load();
 		this.mEngine.getTextureManager().loadTexture(
 				this.mOnScreenControlTexture);
@@ -425,11 +466,11 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					createRandomBall();
 				}
 				
-				if (playTime !=0 && playTime % 25 == 0 && starAppeared == false) {
+				if (playTime !=0 && playTime % 10 == 0 && starAppeared == false) {
 					starAppeared = true;
 					createRandomStar();
 				}
-				if (playTime % 25 != 0) {
+				if (playTime % 10 != 0) {
 					starAppeared = false;
 				}
 				
@@ -439,11 +480,14 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					FallingObject ball = ballList.get(key);
 					
 					
-					if (ball.getPosY() >= (CAMERA_HEIGHT - stickMan.getHeight()/3*2) || stickMan.collidesWith(ball)) {
+					if (ball.getPosY() >= (CAMERA_HEIGHT - ball.getHeight() - 20) || stickMan.collidesWith(ball)) {
 						ballCount--;
 						ball.detachSelf();
 						ball.dispose();
-						tempRemove.add(key);	
+						tempRemove.add(key);
+						
+						splashAnimation(ball);
+						
 						if (stickMan.collidesWith(ball)) {
 							gameOver();
 							stickMan.isDead = true;
@@ -546,7 +590,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	}
 	
 	public void createRandomStar() {
-		FallingObject star = new FallingBigStar(randomBallPos(), -100, bigStarBitmapTextureRegion,
+		FallingObject star = new FallingBigStar(randomBallPos(), -120, bigStarBitmapTextureRegion,
 								this.getVertexBufferObjectManager());
 		ballList.put(System.currentTimeMillis(), star);
 		mScene.attachChild(star);
@@ -556,6 +600,50 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	public float randomBallPos() {
 		Random random = new Random();
 		return random.nextFloat() * (CAMERA_WIDTH - circleBitmapTextureRegion.getWidth());
+	}
+	
+	/** For Falling Object splashing. */
+	public void splashAnimation(FallingObject obj) {
+		final SplashAnimation splash;
+		String color = obj.color;
+		switch(color) {
+		case "red" : splash = new SplashAnimation(obj.getX(), obj.getY() + 10, this.redSplashBitmapTextureRegion, 
+						this.getVertexBufferObjectManager());
+					 break;
+		case "blue" : splash = new SplashAnimation(obj.getX(), obj.getY() + 10, this.blueSplashBitmapTextureRegion,
+						this.getVertexBufferObjectManager());
+					 break;
+		case "pink" : splash = new SplashAnimation(obj.getX(), obj.getY() + 10, this.pinkSplashBitmapTextureRegion,
+						this.getVertexBufferObjectManager());
+					 break;
+		default		: splash = new SplashAnimation(obj.getX(), obj.getY(), this.blackSplashBitmapTextureRegion,
+						this.getVertexBufferObjectManager());
+					 break;
+		}
+		
+		mScene.attachChild(splash);
+		
+		
+		splash.registerUpdateHandler(new IUpdateHandler() {
+
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				if (splash.getCurrentTileIndex() == 3) {
+					runOnUpdateThread(new Runnable() {
+						@Override
+						public void run() {
+							mScene.detachChild(splash);
+						}
+					});
+				}
+				
+			}
+
+			@Override
+			public void reset(){
+			}
+			
+		});
 	}
 
 	public void gameOver() {

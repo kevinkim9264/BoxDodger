@@ -14,6 +14,7 @@ public class FallingObject extends AnimatedSprite{
 	boolean already_collided = false;
 	int START_VELOCITY;
 	int ACCELERATION;
+	String color = "black"; //Necessary for splash animation
 	
 	public FallingObject(final float pX, final float pY, final TiledTextureRegion pTextureRegion,
 			final VertexBufferObjectManager pVertexBufferObjectManager, int initVelocity, int initAcceleration) {

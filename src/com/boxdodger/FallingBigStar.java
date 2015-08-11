@@ -10,6 +10,7 @@ public class FallingBigStar extends FallingObject {
 			VertexBufferObjectManager pVertexBufferObjectManager) {
 		super(pX, pY, pTextureRegion, pVertexBufferObjectManager, 20, 200);
 		this.registerEntityModifier(new RotationModifier(5, 0, 360));
+		this.color = "black";
 	}
 
 }

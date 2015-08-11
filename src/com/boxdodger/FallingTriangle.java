@@ -10,6 +10,7 @@ public class FallingTriangle extends FallingObject {
 			VertexBufferObjectManager pVertexBufferObjectManager) {
 		super(pX, pY, pTextureRegion, pVertexBufferObjectManager, 50, 400);
 		this.registerEntityModifier(new RotationModifier(2, 0, 720));
+		this.color = "pink";
 	}
 
 }
