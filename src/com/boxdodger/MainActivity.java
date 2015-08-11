@@ -439,7 +439,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					FallingObject ball = ballList.get(key);
 					
 					
-					if (ball.getPosY() >= CAMERA_HEIGHT || stickMan.collidesWith(ball)) {
+					if (ball.getPosY() >= (CAMERA_HEIGHT - stickMan.getHeight()/3*2) || stickMan.collidesWith(ball)) {
 						ballCount--;
 						ball.detachSelf();
 						ball.dispose();
