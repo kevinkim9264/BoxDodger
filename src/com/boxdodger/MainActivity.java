@@ -3,7 +3,7 @@ package com.boxdodger;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.Random;
 import java.util.Vector;
 
@@ -118,7 +118,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	
 	
 	static StickMan stickMan;
-	HashMap<Long, FallingObject> ballList = new HashMap<Long, FallingObject>();
+	
 	ArrayList<Long> tempRemove = new ArrayList<Long>();
 	
 	private boolean movingRight = false;
@@ -192,7 +192,9 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 			
 			setDialog();
 		} else {
+			if (saveThread.getState() == Thread.State.NEW) {
 			saveThread.start();
+			}
 			super.onBackPressed();
 		}
 	}
@@ -287,7 +289,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		this.stickBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 256, 512,
 				TextureOptions.BILINEAR);
 		this.stickBitmapTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-				this.stickBitmapTextureAtlas, this, "stick_man_better_trans.png", 0, 0, 4, 4);
+				this.stickBitmapTextureAtlas, this, "stick_man_better_trans_thinner.png", 0, 0, 4, 4);
 		this.stickBitmapTextureAtlas.load();
 		
 		//creating resrouces for Falling Objects
@@ -476,30 +478,6 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 				
 				
 				
-				for (Long key: ballList.keySet()) {
-					FallingObject ball = ballList.get(key);
-					
-					
-					if (ball.getPosY() >= (CAMERA_HEIGHT - ball.getHeight() - 20) || stickMan.collidesWith(ball)) {
-						ballCount--;
-						ball.detachSelf();
-						ball.dispose();
-						tempRemove.add(key);
-						
-						splashAnimation(ball);
-						
-						if (stickMan.collidesWith(ball)) {
-							gameOver();
-							stickMan.isDead = true;
-						}
-					}
-				}
-				
-				for (Long key : tempRemove) {
-					ballList.remove(key);
-				}
-				
-				
 				if (playTime < 10) {
 					maxBallCount = playTime;
 					
@@ -572,7 +550,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		Random random = new Random();
 		int randomShape = random.nextInt(10);
 		
-		FallingObject object;
+		final FallingObject object;
 		if (randomShape >= 0 && randomShape <= 6) {
 			object = new FallingCircle(randomBallPos(), -20, circleBitmapTextureRegion,
 									this.getVertexBufferObjectManager());
@@ -584,17 +562,69 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 			object = new FallingTriangle(randomBallPos(), -20, triangleBitmapTextureRegion,
 									this.getVertexBufferObjectManager());
 		}
-		ballList.put(System.currentTimeMillis(), object);
+		
 		mScene.attachChild(object);
 		this.ballCount++;
+		
+		object.registerUpdateHandler(new IUpdateHandler() {
+
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				if (object.getPosY() >= (CAMERA_HEIGHT - object.getHeight() - 20) || stickMan.collidesWith(object)) {
+					runOnUpdateThread(new Runnable() {
+						@Override
+						public void run() {
+							ballCount--;
+							mScene.detachChild(object);
+							splashAnimation(object);
+							if (stickMan.collidesWith(object)) {
+								gameOver();
+								stickMan.isDead = true;
+							}
+						}
+					});
+				}		
+			}
+
+			@Override
+			public void reset(){
+			}
+			
+		});
 	}
 	
 	public void createRandomStar() {
-		FallingObject star = new FallingBigStar(randomBallPos(), -120, bigStarBitmapTextureRegion,
+		final FallingObject star = new FallingBigStar(randomBallPos(), -120, bigStarBitmapTextureRegion,
 								this.getVertexBufferObjectManager());
-		ballList.put(System.currentTimeMillis(), star);
+		
 		mScene.attachChild(star);
 		this.ballCount++;
+		
+		star.registerUpdateHandler(new IUpdateHandler() {
+
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				if (star.getPosY() >= (CAMERA_HEIGHT - star.getHeight() - 20) || stickMan.collidesWith(star)) {
+					runOnUpdateThread(new Runnable() {
+						@Override
+						public void run() {
+							ballCount--;
+							mScene.detachChild(star);
+							splashAnimation(star);
+							if (stickMan.collidesWith(star)) {
+								gameOver();
+								stickMan.isDead = true;
+							}
+						}
+					});
+				}		
+			}
+
+			@Override
+			public void reset(){
+			}
+			
+		});
 	}
 	
 	public float randomBallPos() {
@@ -607,13 +637,13 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		final SplashAnimation splash;
 		String color = obj.color;
 		switch(color) {
-		case "red" : splash = new SplashAnimation(obj.getX(), obj.getY() + 10, this.redSplashBitmapTextureRegion, 
+		case "red" : splash = new SplashAnimation(obj.getX(), obj.getY() + 5, this.redSplashBitmapTextureRegion, 
 						this.getVertexBufferObjectManager());
 					 break;
-		case "blue" : splash = new SplashAnimation(obj.getX(), obj.getY() + 10, this.blueSplashBitmapTextureRegion,
+		case "blue" : splash = new SplashAnimation(obj.getX(), obj.getY() + 5, this.blueSplashBitmapTextureRegion,
 						this.getVertexBufferObjectManager());
 					 break;
-		case "pink" : splash = new SplashAnimation(obj.getX(), obj.getY() + 10, this.pinkSplashBitmapTextureRegion,
+		case "pink" : splash = new SplashAnimation(obj.getX(), obj.getY() + 5, this.pinkSplashBitmapTextureRegion,
 						this.getVertexBufferObjectManager());
 					 break;
 		default		: splash = new SplashAnimation(obj.getX(), obj.getY(), this.blackSplashBitmapTextureRegion,
@@ -664,7 +694,9 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
 		if (pSceneTouchEvent.isActionDown()) {
 			if (stickMan.isDead){
+				if (saveThread.getState() == Thread.State.NEW) {
 				saveThread.start();
+				}
 				finish();
 				return true;
 			}
