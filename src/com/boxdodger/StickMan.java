@@ -15,7 +15,7 @@ public class StickMan extends AnimatedSprite{
 	public boolean isDead = false;
 	public boolean deadMotion = false;
 	
-	private float oldVelocity = 300.0f;
+    protected float oldVelocity = 300.0f;
 	
 	public StickMan(final float pX, final float pY, final TiledTextureRegion pTextureRegion,
 			final VertexBufferObjectManager pVertexBufferObjectManager) {

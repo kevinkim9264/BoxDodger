@@ -126,8 +126,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	
 	int ballCount = 0;
 	int maxBallCount = 1;
-	int ballVelocity = 20;
-	int ballAcceleration = 200;
+	
 	
 	private Font timeFont;
 	private Font gameOverFont;
@@ -159,7 +158,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		
 		if (justStarted == false) {
 			timePaused = System.currentTimeMillis() - timePausedStart;
-			System.out.println("Resumed!");
+			//System.out.println("Resumed!");
 		}
 		justStarted = false;
 	}
@@ -400,11 +399,22 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 							float pValueX, float pValueY) {
 						if (stickMan.isDead == false){
 							if (pValueX > 0) {
-								stickMan.setVelocity(pValueX * 500);
-								stickMan.moveRight();
+								if (pValueX < 0.2) {
+									stickMan.setVelocity(pValueX * 500);
+									stickMan.moveRight();
+								} else {
+									stickMan.setVelocity(pValueX * 700);
+									stickMan.moveRight();
+								}
+								
 							} else if (pValueX < 0) { // Controller to the left
-								stickMan.setVelocity(pValueX * (-500));
-								stickMan.moveLeft();
+								if (pValueX > -0.2) {
+									stickMan.setVelocity(pValueX * (-500));
+									stickMan.moveLeft();
+								} else {
+									stickMan.setVelocity(pValueX * (-700));
+									stickMan.moveLeft();
+								}
 							} else if (pValueX == 0) {
 								//stickMan.registerEntityModifier(new RotationModifier(3, 0, 360));
 								stickMan.moveStop();
@@ -417,6 +427,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 								
 							}
 						}
+						//System.out.println("pValueX = " + pValueX);
 						
 					}
 
@@ -464,7 +475,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 				}
 				
 				if (ballCount < maxBallCount) {
-					System.out.println(ballCount + " ,  " + playTime);
+					//System.out.println(ballCount + " ,  " + playTime);
 					createRandomBall();
 				}
 				
@@ -476,43 +487,31 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					starAppeared = false;
 				}
 				
-				
+				//System.out.println(maxBallCount);
 				
 				if (playTime < 10) {
 					maxBallCount = playTime;
-					
 				} else if (playTime < 15) {
 					maxBallCount = 11;
-					ballVelocity = 25;
-					ballAcceleration = 220;
+					
+					
 				} else if (playTime < 20) {
 					maxBallCount = 12;
 					
 				} else if (playTime < 25) {
 					maxBallCount = 13;
-					ballVelocity = 30;
-					ballAcceleration = 250;
+					
+					
 				} else if (playTime < 30) {
 					maxBallCount = 14;
-					ballVelocity = 35;
-					ballAcceleration = 300;
+					
+				
 				} else if (playTime < 35) {
-					ballVelocity = 40;
-					ballAcceleration = 350;
+					
+				
 				} else if (playTime < 40) {
-					maxBallCount = 15;
-				} else { //From here, for every 10 seconds, maxBallCount += 1  and  velocity += 10 
-					if (oldPlayTime != playTime && playTime % 10 == 0) {
-						oldPlayTime = playTime;
-						maxBallCount++;
-						ballVelocity += 10;
-						stickMan.addVelocity(10);
-						
-					}
+					maxBallCount = 16;
 				}
-				
-				
-				
 			}
 			
 			
